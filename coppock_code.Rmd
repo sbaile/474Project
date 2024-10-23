@@ -1,0 +1,17 @@
+#1. Data Collection
+
+```{r}
+install.packages(c("quantmod", "TTR", "PerformanceAnalytics", "PortfolioAnalytics"))
+library(quantmod)
+library(TTR)
+library(PerformanceAnalytics)
+library(PortfolioAnalytics)
+
+```
+
+```{r}
+# Retrieve stock data for multiple stocks
+symbols <- c("AAPL", "GOOG", "MSFT", "TSLA")
+getSymbols(symbols, src = "yahoo", from = "2020-01-01", to = Sys.Date())
+
+```
