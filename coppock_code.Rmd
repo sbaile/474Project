@@ -78,3 +78,14 @@ colnames(portfolio_returns_data) <- symbols
 
 
 ```
+
+#5. Apply Buy signals
+
+```{r}
+# Adjust returns using buy signals
+adjusted_returns <- portfolio_returns_data
+for (symbol in symbols) {
+  adjusted_returns[, symbol] <- stock_returns[[symbol]] * buy_signals[[symbol]]
+}
+
+```
