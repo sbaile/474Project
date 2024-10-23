@@ -35,3 +35,31 @@ for (symbol in symbols) {
 
 
 ```
+
+#3. Identify Buy signals
+
+```{r}
+# Function to identify buy signals from Coppock curve
+identify_buy_signals <- function(coppock_curve) {
+  buy_signals <- ifelse(lag(coppock_curve, 1) < 0 & coppock_curve > 0, 1, 0)
+  return(buy_signals)
+}
+
+# Identify buy signals for each stock
+buy_signals <- list()
+for (symbol in symbols) {
+  buy_signals[[symbol]] <- identify_buy_signals(coppock_curves[[symbol]])
+}
+
+# Merge buy signals into a single xts object (aligned by date)
+buy_signals_df <- do.call(merge, buy_signals)
+colnames(buy_signals_df) <- symbols  # Name columns with stock symbols
+
+# Convert the xts object to a data frame
+buy_signals_df <- as.data.frame(buy_signals_df)
+buy_signals_df[is.na(buy_signals_df)] <- 0
+# View the resulting buy signals data frame
+tail(buy_signals_df)
+
+
+```
