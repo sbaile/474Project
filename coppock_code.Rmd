@@ -63,3 +63,18 @@ tail(buy_signals_df)
 
 
 ```
+
+#4. Calculate stock returns
+```{r}
+# Calculate daily returns for each stock
+stock_returns <- list()
+for (symbol in symbols) {
+  stock_returns[[symbol]] <- dailyReturn(Cl(get(symbol)))
+}
+
+# Combine returns into a single xts object
+portfolio_returns_data <- do.call(merge, stock_returns)
+colnames(portfolio_returns_data) <- symbols
+
+
+```
