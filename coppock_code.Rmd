@@ -15,3 +15,23 @@ symbols <- c("AAPL", "GOOG", "MSFT", "TSLA")
 getSymbols(symbols, src = "yahoo", from = "2020-01-01", to = Sys.Date())
 
 ```
+
+#2. Calculate Curve
+
+```{r}
+# Function to calculate Coppock curve for a stock
+calculate_coppock_curve <- function(stock_data) {
+  roc_14 <- ROC(Cl(stock_data), n = 14 * 21)  # Approximate monthly using 21 trading days
+  roc_11 <- ROC(Cl(stock_data), n = 11 * 21)
+  coppock_curve <- WMA(roc_14 + roc_11, n = 10 * 21)  # 10-month WMA
+  return(coppock_curve)
+}
+
+# Calculate Coppock curves for all stocks
+coppock_curves <- list()
+for (symbol in symbols) {
+  coppock_curves[[symbol]] <- calculate_coppock_curve(get(symbol))
+}
+
+
+```
