@@ -89,3 +89,33 @@ for (symbol in symbols) {
 }
 
 ```
+
+#6. Build Portfolio
+
+```{r}
+# Define equal weights for simplicity (can adjust based on your strategy)
+weights <- rep(1 / length(symbols), length(symbols))
+
+# Calculate the portfolio's returns based on weighted individual stock returns
+portfolio_returns <- Return.portfolio(adjusted_returns, weights = weights)
+
+# Check the first few rows of the portfolio returns
+head(portfolio_returns)
+
+```
+
+#7. Backtest/Analyze performance
+
+```{r}
+# Plot cumulative returns of the portfolio
+chart.CumReturns(portfolio_returns, main = "Cumulative Portfolio Returns", legend.loc = "bottomleft")
+
+# Calculate Sharpe ratio
+sharpe_ratio <- SharpeRatio(portfolio_returns)
+print(sharpe_ratio)
+
+# Calculate maximum drawdown
+max_drawdown <- maxDrawdown(portfolio_returns)
+print(max_drawdown)
+
+```
