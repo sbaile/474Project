@@ -21,8 +21,24 @@ library(PortfolioAnalytics)
 
 ```{r}
 # Retrieve stock data for multiple stocks
-symbols <- c("AAPL", "NVDA", "MSFT", "AVGO","ORCL")
-getSymbols(symbols, src = "yahoo", from = "2010-01-01", to = Sys.Date())
+
+# Combine symbols into a named list by subcategory
+symbols_list <- list(
+  tech = c("AAPL", "NVDA", "MSFT", "AVGO", "ORCL"),
+  finance = c("BRK-B", "JPM", "V", "MA", "BAC"),
+  health = c("LLY", "UNH", "JNJ", "ABBV", "MRK"),
+  consumer_cyclical = c("AMZN", "TSLA", "HD", "MCD", "LOW")
+)
+
+# Initialize an empty list to store all stock data
+stock_data <- list()
+
+# Load stock data for each subcategory and store it in stock_data
+for (category in names(symbols_list)) {
+  for (symbol in symbols_list[[category]]) {
+    stock_data[[symbol]] <- getSymbols(symbol, src = "yahoo", from = "2010-01-01", to = Sys.Date(), auto.assign = FALSE)
+  }
+}
 
 ```
 
@@ -37,12 +53,16 @@ calculate_coppock_curve <- function(stock_data) {
   return(coppock_curve)
 }
 
-# Calculate Coppock curves for all stocks
+# Initialize an empty list to store the Coppock curves
 coppock_curves <- list()
-for (symbol in symbols) {
-  coppock_curves[[symbol]] <- calculate_coppock_curve(get(symbol))
-}
 
+# Loop through each subcategory and calculate Coppock curves for all symbols
+for (category in names(symbols_list)) {
+  for (symbol in symbols_list[[category]]) {
+    # Calculate the Coppock curve using the stock data stored in the stock_data list
+    coppock_curves[[symbol]] <- calculate_coppock_curve(stock_data[[symbol]])
+  }
+}
 
 ```
 
@@ -71,8 +91,21 @@ buy_signals_df[is.na(buy_signals_df)] <- 0
 # View the resulting buy signals data frame
 tail(buy_signals_df)
 
-
 ```
+
+##Visualization showing number of buy signals over time for each stock
+```{r}
+# Count the total number of buy signals for each stock
+total_buy_signals <- colSums(buy_signals_df)
+
+# Create a bar plot
+barplot(total_buy_signals, 
+        main = "Total Buy Signals for Tech Stocks",
+        xlab = "Stock",
+        ylab = "Number of Buy Signals",
+        col = "lightblue")
+```
+
 
 #4. Calculate stock returns
 ```{r}
