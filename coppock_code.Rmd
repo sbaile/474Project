@@ -119,13 +119,38 @@ colnames(buy_signals_df) <- col_names
 ```{r}
 # Count the total number of buy signals for each stock
 total_buy_signals <- colSums(buy_signals_df)
+  
+# Set up a multi-plot layout (adjust n and m for the number of plots you want)
+n <- length(symbols_list)  # Number of categories
+par(mfrow = c(ceiling(n / 2), 2))  # Adjust layout to 2 columns
 
-# Create a bar plot
-barplot(total_buy_signals, 
-        main = "Total Buy Signals for Tech Stocks",
-        xlab = "Stock",
-        ylab = "Number of Buy Signals",
-        col = "lightblue")
+# Loop through each subcategory in symbols_list
+for (category in names(symbols_list)) {
+  # Select the relevant symbols for the current category, with hierarchical names
+  symbols <- symbols_list[[category]]
+  # Create hierarchical names for column access
+  hierarchical_symbols <- paste(category, symbols, sep = "_")
+  
+  # Check if hierarchical names exist in buy_signals_df
+  if (all(hierarchical_symbols %in% colnames(buy_signals_df))) {
+    # Count the total number of buy signals for each stock in the current subcategory
+    total_buy_signals <- colSums(buy_signals_df[, hierarchical_symbols, drop = FALSE])
+    
+    # Create a bar plot for the current subcategory
+    barplot(total_buy_signals, 
+            main = paste("Total Buy Signals for", category),
+            xlab = "Stock",
+            ylab = "Number of Buy Signals",
+            col = "lightblue",
+            #las = 2,  # las=2 makes the x-axis labels perpendicular for better readability
+            names.arg = symbols)  # Set names.arg to symbols to display only the stock symbols
+  } else {
+    warning(paste("Some symbols in category", category, "are not found in the dataframe."))
+  }
+}
+
+# Reset the graphical parameters
+par(mfrow = c(1, 1))  # Reset to single plot layout
 ```
 
 
