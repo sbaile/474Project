@@ -171,18 +171,22 @@ for (category in names(symbols_list)) {
 
   # Calculate daily returns for each stock in the current category
   for (symbol in symbols) {
-    # Use the original symbol name to get the data
-    stock_returns[[paste(category, symbol, sep = "_")]] <- dailyReturn(Cl(get(symbol)))
+    # Calculate daily returns using the Close prices
+    daily_ret <- dailyReturn(Cl(get(symbol)))
+    
+    # Store the daily returns with hierarchical names
+    hierarchical_name <- paste(category, symbol, sep = "_")
+    stock_returns[[hierarchical_name]] <- daily_ret
   }
 }
 
 # Combine returns into a single xts object
 portfolio_returns_data <- do.call(merge, stock_returns)
 
-# Set column names back to the original stock symbols for the merged data
+# Set column names back to the original stock symbols (optional)
 colnames(portfolio_returns_data) <- unlist(symbols_list)
 
-# Display the portfolio returns data
+# Display the first few rows of the portfolio returns data
 head(portfolio_returns_data)
 ```
 
