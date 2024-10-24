@@ -1,7 +1,7 @@
 #1. Data Collection
 
 ##Install Packages Needed
-```{r}{eval=FALSE}
+```{r}
 install.packages(c("quantmod", "TTR", "PerformanceAnalytics", "PortfolioAnalytics"))
 library(quantmod)
 library(TTR)
@@ -83,6 +83,8 @@ for (category in names(symbols_list)) {
   }
 }
 
+# Merge buy signals into a single xts object (aligned by date)
+buy_signals_df <- do.call(merge, buy_signals)
 ```
 
 ```{r}
@@ -152,35 +154,76 @@ for (category in names(symbols_list)) {
 # Reset the graphical parameters
 par(mfrow = c(1, 1))  # Reset to single plot layout
 ```
-
+#Above this line has been updated to accomodate for the new list of stocks
 
 #4. Calculate stock returns
 ```{r}
-# Calculate daily returns for each stock
+# Initialize a list to store daily returns
 stock_returns <- list()
-for (symbol in symbols) {
-  stock_returns[[symbol]] <- dailyReturn(Cl(get(symbol)))
+
+# Loop through each subcategory in symbols_list
+for (category in names(symbols_list)) {
+  # Get the symbols for the current category
+  symbols <- symbols_list[[category]]
+  
+  # Retrieve stock data for each symbol (using original symbol names)
+  getSymbols(symbols, src = "yahoo", from = "2010-01-01", to = Sys.Date(), auto.assign = TRUE)
+
+  # Calculate daily returns for each stock in the current category
+  for (symbol in symbols) {
+    # Use the original symbol name to get the data
+    stock_returns[[paste(category, symbol, sep = "_")]] <- dailyReturn(Cl(get(symbol)))
+  }
 }
 
 # Combine returns into a single xts object
 portfolio_returns_data <- do.call(merge, stock_returns)
-colnames(portfolio_returns_data) <- symbols
 
+# Set column names back to the original stock symbols for the merged data
+colnames(portfolio_returns_data) <- unlist(symbols_list)
 
+# Display the portfolio returns data
+head(portfolio_returns_data)
 ```
 
 #5. Apply Buy signals
 
 ```{r}
-# Adjust returns using buy signals
+# Initialize adjusted returns
 adjusted_returns <- portfolio_returns_data
-for (symbol in symbols) {
-  adjusted_returns[, symbol] <- stock_returns[[symbol]] * buy_signals[[symbol]]
+
+# Loop through each subcategory in symbols_list
+for (category in names(symbols_list)) {
+  # Get the symbols for the current category
+  symbols <- symbols_list[[category]]
+  
+  # Loop through each symbol in the category
+  for (symbol in symbols) {
+    # Create the hierarchical name for the current symbol
+    hierarchical_symbol <- paste(category, symbol, sep = "_")
+    
+    # Adjust returns using buy signals
+    if (hierarchical_symbol %in% colnames(buy_signals)) {
+      adjusted_returns[, hierarchical_symbol] <- stock_returns[[hierarchical_symbol]] * buy_signals[[hierarchical_symbol]]
+    } else {
+      warning(paste("Buy signals for", hierarchical_symbol, "not found."))
+    }
+  }
 }
+
+# Display the adjusted returns data
+head(adjusted_returns)
 
 ```
 
 #6. Build Portfolio
+```{r}
+#Portfolio 1: Focus on stocks with frequent buy signals.
+#Portfolio 2: A balanced mix of stocks across multiple sectors.
+#Portfolio 3: Conservative selection 
+#Portfolio 4: Aggressive strategy, focusing on growth stocks.
+
+```
 
 ```{r}
 # Define equal weights for simplicity (can adjust based on your strategy)
