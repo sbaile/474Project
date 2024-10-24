@@ -77,21 +77,43 @@ identify_buy_signals <- function(coppock_curve) {
 
 # Identify buy signals for each stock
 buy_signals <- list()
-for (symbol in symbols) {
-  buy_signals[[symbol]] <- identify_buy_signals(coppock_curves[[symbol]])
+for (category in names(symbols_list)) {
+  for (symbol in symbols_list[[category]]) {
+    buy_signals[[symbol]] <- identify_buy_signals(coppock_curves[[symbol]])
+  }
 }
 
-# Merge buy signals into a single xts object (aligned by date)
-buy_signals_df <- do.call(merge, buy_signals)
-colnames(buy_signals_df) <- symbols  # Name columns with stock symbols
-
-# Convert the xts object to a data frame
-buy_signals_df <- as.data.frame(buy_signals_df)
-buy_signals_df[is.na(buy_signals_df)] <- 0
-# View the resulting buy signals data frame
-tail(buy_signals_df)
-
 ```
+
+```{r}
+# Initialize an empty list to store buy signals data frames by subcategory
+buy_signals_list <- list()
+
+# Loop through each subcategory to create separate data frames
+for (category in names(symbols_list)) {
+  # Create a data frame for the current subcategory with symbols as columns
+  buy_signals_list[[category]] <- data.frame(matrix(nrow = nrow(buy_signals_df), ncol = length(symbols_list[[category]])))
+  
+  # Assign the symbol names as the column names for this subcategory's data frame
+  colnames(buy_signals_list[[category]]) <- symbols_list[[category]]
+}
+
+# Replace all NAs with 0
+buy_signals_df[is.na(buy_signals_df)] <- 0
+
+#library(data.table)
+
+# Create hierarchical column names with both subcategory and symbol
+col_names <- unlist(lapply(names(symbols_list), function(category) {
+  symbols <- symbols_list[[category]]
+  paste(category, symbols, sep = "_")
+}))
+
+# Assign the hierarchical names to the columns of buy_signals_df
+colnames(buy_signals_df) <- col_names
+```
+
+
 
 ##Visualization showing number of buy signals over time for each stock
 ```{r}
