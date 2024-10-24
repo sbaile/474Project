@@ -1,5 +1,6 @@
 #1. Data Collection
 
+##Install Packages Needed
 ```{r}
 install.packages(c("quantmod", "TTR", "PerformanceAnalytics", "PortfolioAnalytics"))
 library(quantmod)
@@ -9,9 +10,245 @@ library(PortfolioAnalytics)
 
 ```
 
+#Retrieve Data
+```{r}
+#Stock data to be collected - the top 5 largest companies in each sector
+#Technology (market weight: 28.92%): AAPL, NVDA, MSFT, AVGO, ORCL
+#Financial Services (market weight: 14.94%): BRK-B, JPM, V, MA, BAC
+#Healthcare (market weight: 10.61%): LLY, UNH, JNJ, ABBV, MRK
+#Consumer Cyclical (market weight: 10.56%): AMZN, TSLA, HD, MCD, LOW
+```
+
 ```{r}
 # Retrieve stock data for multiple stocks
-symbols <- c("AAPL", "GOOG", "MSFT", "TSLA")
-getSymbols(symbols, src = "yahoo", from = "2020-01-01", to = Sys.Date())
+
+# Combine symbols into a named list by subcategory
+symbols_list <- list(
+  tech = c("AAPL", "NVDA", "MSFT", "AVGO", "ORCL"),
+  finance = c("BRK-B", "JPM", "V", "MA", "BAC"),
+  health = c("LLY", "UNH", "JNJ", "ABBV", "MRK"),
+  consumer_cyclical = c("AMZN", "TSLA", "HD", "MCD", "LOW")
+)
+
+# Initialize an empty list to store all stock data
+stock_data <- list()
+
+# Load stock data for each subcategory and store it in stock_data
+for (category in names(symbols_list)) {
+  for (symbol in symbols_list[[category]]) {
+    stock_data[[symbol]] <- getSymbols(symbol, src = "yahoo", from = "2010-01-01", to = Sys.Date(), auto.assign = FALSE)
+  }
+}
+
+```
+
+#2. Calculate Curve
+
+```{r}
+# Function to calculate Coppock curve for a stock
+calculate_coppock_curve <- function(stock_data) {
+  roc_14 <- ROC(Cl(stock_data), n = 14 * 21)  # Approximate monthly using 21 trading days
+  roc_11 <- ROC(Cl(stock_data), n = 11 * 21)
+  coppock_curve <- WMA(roc_14 + roc_11, n = 10 * 21)  # 10-month WMA
+  return(coppock_curve)
+}
+
+# Initialize an empty list to store the Coppock curves
+coppock_curves <- list()
+
+# Loop through each subcategory and calculate Coppock curves for all symbols
+for (category in names(symbols_list)) {
+  for (symbol in symbols_list[[category]]) {
+    # Calculate the Coppock curve using the stock data stored in the stock_data list
+    coppock_curves[[symbol]] <- calculate_coppock_curve(stock_data[[symbol]])
+  }
+}
+
+```
+
+#3. Identify Buy signals
+
+```{r}
+# Function to identify buy signals from Coppock curve
+identify_buy_signals <- function(coppock_curve) {
+  buy_signals <- ifelse(lag(coppock_curve, 1) < 0 & coppock_curve > 0, 1, 0)
+  return(buy_signals)
+}
+
+# Identify buy signals for each stock
+buy_signals <- list()
+for (category in names(symbols_list)) {
+  for (symbol in symbols_list[[category]]) {
+    buy_signals[[symbol]] <- identify_buy_signals(coppock_curves[[symbol]])
+  }
+}
+
+# Merge buy signals into a single xts object (aligned by date)
+buy_signals_df <- do.call(merge, buy_signals)
+```
+
+```{r}
+# Initialize an empty list to store buy signals data frames by subcategory
+buy_signals_list <- list()
+
+# Loop through each subcategory to create separate data frames
+for (category in names(symbols_list)) {
+  # Create a data frame for the current subcategory with symbols as columns
+  buy_signals_list[[category]] <- data.frame(matrix(nrow = nrow(buy_signals_df), ncol = length(symbols_list[[category]])))
+  
+  # Assign the symbol names as the column names for this subcategory's data frame
+  colnames(buy_signals_list[[category]]) <- symbols_list[[category]]
+}
+
+# Replace all NAs with 0
+buy_signals_df[is.na(buy_signals_df)] <- 0
+
+#library(data.table)
+
+# Create hierarchical column names with both subcategory and symbol
+col_names <- unlist(lapply(names(symbols_list), function(category) {
+  symbols <- symbols_list[[category]]
+  paste(category, symbols, sep = "_")
+}))
+
+# Assign the hierarchical names to the columns of buy_signals_df
+colnames(buy_signals_df) <- col_names
+```
+
+
+
+##Visualization showing number of buy signals over time for each stock
+```{r}
+# Count the total number of buy signals for each stock
+total_buy_signals <- colSums(buy_signals_df)
+  
+# Set up a multi-plot layout (adjust n and m for the number of plots you want)
+n <- length(symbols_list)  # Number of categories
+par(mfrow = c(ceiling(n / 2), 2))  # Adjust layout to 2 columns
+
+# Loop through each subcategory in symbols_list
+for (category in names(symbols_list)) {
+  # Select the relevant symbols for the current category, with hierarchical names
+  symbols <- symbols_list[[category]]
+  # Create hierarchical names for column access
+  hierarchical_symbols <- paste(category, symbols, sep = "_")
+  
+  # Check if hierarchical names exist in buy_signals_df
+  if (all(hierarchical_symbols %in% colnames(buy_signals_df))) {
+    # Count the total number of buy signals for each stock in the current subcategory
+    total_buy_signals <- colSums(buy_signals_df[, hierarchical_symbols, drop = FALSE])
+    
+    # Create a bar plot for the current subcategory
+    barplot(total_buy_signals, 
+            main = paste("Total Buy Signals for", category),
+            xlab = "Stock",
+            ylab = "Number of Buy Signals",
+            col = "lightblue",
+            #las = 2,  # las=2 makes the x-axis labels perpendicular for better readability
+            names.arg = symbols)  # Set names.arg to symbols to display only the stock symbols
+  } else {
+    warning(paste("Some symbols in category", category, "are not found in the dataframe."))
+  }
+}
+
+# Reset the graphical parameters
+par(mfrow = c(1, 1))  # Reset to single plot layout
+```
+#Above this line has been updated to accomodate for the new list of stocks
+
+#4. Calculate stock returns
+```{r}
+# Initialize a list to store daily returns
+stock_returns <- list()
+
+# Loop through each subcategory in symbols_list
+for (category in names(symbols_list)) {
+  # Get the symbols for the current category
+  symbols <- symbols_list[[category]]
+  
+  # Retrieve stock data for each symbol (using original symbol names)
+  getSymbols(symbols, src = "yahoo", from = "2010-01-01", to = Sys.Date(), auto.assign = TRUE)
+
+  # Calculate daily returns for each stock in the current category
+  for (symbol in symbols) {
+    # Use the original symbol name to get the data
+    stock_returns[[paste(category, symbol, sep = "_")]] <- dailyReturn(Cl(get(symbol)))
+  }
+}
+
+# Combine returns into a single xts object
+portfolio_returns_data <- do.call(merge, stock_returns)
+
+# Set column names back to the original stock symbols for the merged data
+colnames(portfolio_returns_data) <- unlist(symbols_list)
+
+# Display the portfolio returns data
+head(portfolio_returns_data)
+```
+
+#5. Apply Buy signals
+
+```{r}
+# Initialize adjusted returns
+adjusted_returns <- portfolio_returns_data
+
+# Loop through each subcategory in symbols_list
+for (category in names(symbols_list)) {
+  # Get the symbols for the current category
+  symbols <- symbols_list[[category]]
+  
+  # Loop through each symbol in the category
+  for (symbol in symbols) {
+    # Create the hierarchical name for the current symbol
+    hierarchical_symbol <- paste(category, symbol, sep = "_")
+    
+    # Adjust returns using buy signals
+    if (hierarchical_symbol %in% colnames(buy_signals)) {
+      adjusted_returns[, hierarchical_symbol] <- stock_returns[[hierarchical_symbol]] * buy_signals[[hierarchical_symbol]]
+    } else {
+      warning(paste("Buy signals for", hierarchical_symbol, "not found."))
+    }
+  }
+}
+
+# Display the adjusted returns data
+head(adjusted_returns)
+
+```
+
+#6. Build Portfolio
+```{r}
+#Portfolio 1: Focus on stocks with frequent buy signals.
+#Portfolio 2: A balanced mix of stocks across multiple sectors.
+#Portfolio 3: Conservative selection 
+#Portfolio 4: Aggressive strategy, focusing on growth stocks.
+
+```
+
+```{r}
+# Define equal weights for simplicity (can adjust based on your strategy)
+weights <- rep(1 / length(symbols), length(symbols))
+
+# Calculate the portfolio's returns based on weighted individual stock returns
+portfolio_returns <- Return.portfolio(adjusted_returns, weights = weights)
+
+# Check the first few rows of the portfolio returns
+head(portfolio_returns)
+
+```
+
+#7. Backtest/Analyze performance
+
+```{r}
+# Plot cumulative returns of the portfolio
+chart.CumReturns(portfolio_returns, main = "Cumulative Portfolio Returns", legend.loc = "bottomleft")
+
+# Calculate Sharpe ratio
+sharpe_ratio <- SharpeRatio(portfolio_returns)
+print(sharpe_ratio)
+
+# Calculate maximum drawdown
+max_drawdown <- maxDrawdown(portfolio_returns)
+print(max_drawdown)
 
 ```
