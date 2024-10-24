@@ -1,6 +1,7 @@
 #1. Data Collection
 
-```{r}
+##Install Packages Needed
+```{r}{eval=FALSE}
 install.packages(c("quantmod", "TTR", "PerformanceAnalytics", "PortfolioAnalytics"))
 library(quantmod)
 library(TTR)
@@ -9,10 +10,19 @@ library(PortfolioAnalytics)
 
 ```
 
+#Retrieve Data
+```{r}
+#Stock data to be collected - the top 5 largest companies in each sector
+#Technology (market weight: 28.92%): AAPL, NVDA, MSFT, AVGO, ORCL
+#Financial Services (market weight: 14.94%): BRK-B, JPM, V, MA, BAC
+#Healthcare (market weight: 10.61%): LLY, UNH, JNJ, ABBV, MRK
+#Consumer Cyclical (market weight: 10.56%): AMZN, TSLA, HD, MCD, LOW
+```
+
 ```{r}
 # Retrieve stock data for multiple stocks
-symbols <- c("AAPL", "GOOG", "MSFT", "TSLA")
-getSymbols(symbols, src = "yahoo", from = "2020-01-01", to = Sys.Date())
+symbols <- c("AAPL", "NVDA", "MSFT", "AVGO","ORCL")
+getSymbols(symbols, src = "yahoo", from = "2010-01-01", to = Sys.Date())
 
 ```
 
