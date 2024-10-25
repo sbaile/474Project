@@ -2,7 +2,7 @@
 
 ##Install Packages Needed
 ```{r}
-install.packages(c("quantmod", "TTR", "PerformanceAnalytics", "PortfolioAnalytics"))
+#install.packages(c("quantmod", "TTR", "PerformanceAnalytics", "PortfolioAnalytics"))
 library(quantmod)
 library(TTR)
 library(PerformanceAnalytics)
@@ -154,7 +154,7 @@ for (category in names(symbols_list)) {
 # Reset the graphical parameters
 par(mfrow = c(1, 1))  # Reset to single plot layout
 ```
-#Above this line has been updated to accomodate for the new list of stocks
+
 
 #4. Calculate stock returns
 ```{r}
@@ -171,43 +171,60 @@ for (category in names(symbols_list)) {
 
   # Calculate daily returns for each stock in the current category
   for (symbol in symbols) {
-    # Use the original symbol name to get the data
-    stock_returns[[paste(category, symbol, sep = "_")]] <- dailyReturn(Cl(get(symbol)))
+    # Calculate daily returns using the Close prices
+    daily_ret <- dailyReturn(Cl(get(symbol)))
+    
+    # Store the daily returns with hierarchical names
+    hierarchical_name <- paste(category, symbol, sep = "_")
+    stock_returns[[hierarchical_name]] <- daily_ret
   }
 }
 
 # Combine returns into a single xts object
 portfolio_returns_data <- do.call(merge, stock_returns)
 
-# Set column names back to the original stock symbols for the merged data
-colnames(portfolio_returns_data) <- unlist(symbols_list)
+# Set column names back to the hierarchical names
+colnames(portfolio_returns_data) <- names(stock_returns)
 
-# Display the portfolio returns data
+# Display the first few rows of the portfolio returns data
 head(portfolio_returns_data)
 ```
 
+
 #5. Apply Buy signals
-
 ```{r}
-# Initialize adjusted returns
-adjusted_returns <- portfolio_returns_data
+library(dplyr)
 
-# Loop through each subcategory in symbols_list
-for (category in names(symbols_list)) {
-  # Get the symbols for the current category
-  symbols <- symbols_list[[category]]
+# Ensure buy_signals_df is a data frame
+buy_signals_df <- as.data.frame(buy_signals_df)
+
+# Initialize adjusted returns
+adjusted_returns <- as.data.frame(portfolio_returns_data)
+
+# Ensure no NAs in buy_signals_df (replace NAs with 0)
+buy_signals_df[is.na(buy_signals_df)] <- 0
+
+# Print column names for debugging
+print("Column names in buy_signals_df:")
+print(colnames(buy_signals_df))
+print("Column names in adjusted_returns:")
+print(colnames(adjusted_returns))
+
+# Loop through each column in adjusted returns
+for (column_name in colnames(adjusted_returns)) {
+  # Print current column name to debug
+  print(paste("Current column in adjusted returns:", column_name))
   
-  # Loop through each symbol in the category
-  for (symbol in symbols) {
-    # Create the hierarchical name for the current symbol
-    hierarchical_symbol <- paste(category, symbol, sep = "_")
+  # Check if the column exists in buy_signals_df
+  if (column_name %in% colnames(buy_signals_df)) {
+    # Print current column name for debugging
+    print(paste("Adjusting returns for:", column_name))
     
-    # Adjust returns using buy signals
-    if (hierarchical_symbol %in% colnames(buy_signals)) {
-      adjusted_returns[, hierarchical_symbol] <- stock_returns[[hierarchical_symbol]] * buy_signals[[hierarchical_symbol]]
-    } else {
-      warning(paste("Buy signals for", hierarchical_symbol, "not found."))
-    }
+    # Use mutate to safely multiply returns by buy signals
+    adjusted_returns <- adjusted_returns %>%
+      mutate(!!sym(column_name) := adjusted_returns[[column_name]] * buy_signals_df[[column_name]])
+  } else {
+    warning(paste("Column", column_name, "not found in buy_signals_df."))
   }
 }
 
@@ -215,6 +232,7 @@ for (category in names(symbols_list)) {
 head(adjusted_returns)
 
 ```
+#Above this line has been updated to accomodate for the new list of stocks
 
 #6. Build Portfolio
 ```{r}
