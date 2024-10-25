@@ -1,0 +1,465 @@
+EMA APPL
+```{r}
+stock_data1 <- getSymbols("AAPL", auto.assign = FALSE)
+```
+
+```{r}
+aaplEMA <- function(stock_data1, n){
+  x <- Cl(stock_data1)
+  names(x) <- c("close")
+  x$ema <- NA
+  x$ema[n] <- mean(x$close[1:n])
+  beta <- 2/(n+1)
+  
+  for(i in (n+1):length(x$close)){
+    x$ema[i] <- beta*x$close[i] + as.numeric((1-beta) * x$ema[i-1])
+  }
+  return(x$ema)
+}
+
+aaplplot <- cbind(Cl(stock_data1), aaplEMA(stock_data1, 100))
+plot(aaplplot['2010/'])
+```
+ EMA NVDA
+
+```{r}
+stock_data2 <- getSymbols("NVDA", auto.assign = FALSE)
+```
+
+
+```{r}
+nvdaEMA <- function(stock_data2, n){
+  x <- Cl(stock_data2)
+  names(x) <- c("close")
+  x$ema <- NA
+  x$ema[n] <- mean(x$close[1:n])
+  beta <- 2/(n+1)
+  
+  for(i in (n+1):length(x$close)){
+    x$ema[i] <- beta*x$close[i] + as.numeric((1-beta) * x$ema[i-1])
+  }
+  return(x$ema)
+}
+
+nvdaplot <- cbind(Cl(stock_data2), nvdaEMA(stock_data2, 100))
+plot(nvdaplot['2010/'])
+```
+
+EMA MSFT
+
+```{r}
+stock_data3 <- getSymbols("MSFT", auto.assign = FALSE)
+```
+
+
+```{r}
+msftEMA <- function(stock_data3, n){
+  x <- Cl(stock_data3)
+  names(x) <- c("close")
+  x$ema <- NA
+  x$ema[n] <- mean(x$close[1:n])
+  beta <- 2/(n+1)
+  
+  for(i in (n+1):length(x$close)){
+    x$ema[i] <- beta*x$close[i] + as.numeric((1-beta) * x$ema[i-1])
+  }
+  return(x$ema)
+}
+
+msftplot <- cbind(Cl(stock_data3), msftEMA(stock_data3, 100))
+plot(msftplot['2010/'])
+```
+
+EMA AVGO
+```{r}
+stock_data4 <- getSymbols("AVGO", auto.assign = FALSE)
+```
+
+
+```{r}
+avgoEMA <- function(stock_data4, n){
+  x <- Cl(stock_data4)
+  names(x) <- c("close")
+  x$ema <- NA
+  x$ema[n] <- mean(x$close[1:n])
+  beta <- 2/(n+1)
+  
+  for(i in (n+1):length(x$close)){
+    x$ema[i] <- beta*x$close[i] + as.numeric((1-beta) * x$ema[i-1])
+  }
+  return(x$ema)
+}
+
+avgoplot <- cbind(Cl(stock_data4), avgoEMA(stock_data4, 100))
+plot(avgoplot['2010/'])
+```
+EMA ORCL
+```{r}
+stock_data5 <- getSymbols("ORCL", auto.assign = FALSE)
+```
+
+
+```{r}
+orclEMA <- function(stock_data5, n){
+  x <- Cl(stock_data5)
+  names(x) <- c("close")
+  x$ema <- NA
+  x$ema[n] <- mean(x$close[1:n])
+  beta <- 2/(n+1)
+  
+  for(i in (n+1):length(x$close)){
+    x$ema[i] <- beta*x$close[i] + as.numeric((1-beta) * x$ema[i-1])
+  }
+  return(x$ema)
+}
+
+orclplot <- cbind(Cl(stock_data5), orclEMA(stock_data5, 100))
+plot(orclplot['2010/'])
+```
+EMA BRK-B
+```{r}
+stock_data6 <- getSymbols("BRK-B", auto.assign = FALSE)
+```
+
+
+```{r}
+brkbEMA <- function(stock_data6, n){
+  x <- Cl(stock_data6)
+  names(x) <- c("close")
+  x$ema <- NA
+  x$ema[n] <- mean(x$close[1:n])
+  beta <- 2/(n+1)
+  
+  for(i in (n+1):length(x$close)){
+    x$ema[i] <- beta*x$close[i] + as.numeric((1-beta) * x$ema[i-1])
+  }
+  return(x$ema)
+}
+
+brkbplot <- cbind(Cl(stock_data6), brkbEMA(stock_data6, 100))
+plot(brkbplot['2010/'])
+```
+EMA JPM
+```{r}
+stock_data7 <- getSymbols("JPM", auto.assign = FALSE)
+```
+
+
+```{r}
+jpmEMA <- function(stock_data7, n){
+  x <- Cl(stock_data7)
+  names(x) <- c("close")
+  x$ema <- NA
+  x$ema[n] <- mean(x$close[1:n])
+  beta <- 2/(n+1)
+  
+  for(i in (n+1):length(x$close)){
+    x$ema[i] <- beta*x$close[i] + as.numeric((1-beta) * x$ema[i-1])
+  }
+  return(x$ema)
+}
+
+jpmplot <- cbind(Cl(stock_data7), aaplEMA(stock_data7, 100))
+plot(jpmplot['2010/'])
+```
+EMA V
+```{r}
+stock_data8 <- getSymbols("V", auto.assign = FALSE)
+```
+
+```{r}
+vEMA <- function(stock_data8, n){
+  x <- Cl(stock_data8)
+  names(x) <- c("close")
+  x$ema <- NA
+  x$ema[n] <- mean(x$close[1:n])
+  beta <- 2/(n+1)
+  
+  for(i in (n+1):length(x$close)){
+    x$ema[i] <- beta*x$close[i] + as.numeric((1-beta) * x$ema[i-1])
+  }
+  return(x$ema)
+}
+
+vplot <- cbind(Cl(stock_data8), vEMA(stock_data8, 100))
+plot(vplot['2010/'])
+```
+EMA MA
+```{r}
+stock_data9 <- getSymbols("MA", auto.assign = FALSE)
+```
+
+```{r}
+maEMA <- function(stock_data9, n){
+  x <- Cl(stock_data9)
+  names(x) <- c("close")
+  x$ema <- NA
+  x$ema[n] <- mean(x$close[1:n])
+  beta <- 2/(n+1)
+  
+  for(i in (n+1):length(x$close)){
+    x$ema[i] <- beta*x$close[i] + as.numeric((1-beta) * x$ema[i-1])
+  }
+  return(x$ema)
+}
+
+maplot <- cbind(Cl(stock_data9), maEMA(stock_data9, 100))
+plot(maplot['2010/'])
+```
+EMA BAC
+```{r}
+stock_data10 <- getSymbols("BAC", auto.assign = FALSE)
+```
+
+```{r}
+bacEMA <- function(stock_data10, n){
+  x <- Cl(stock_data10)
+  names(x) <- c("close")
+  x$ema <- NA
+  x$ema[n] <- mean(x$close[1:n])
+  beta <- 2/(n+1)
+  
+  for(i in (n+1):length(x$close)){
+    x$ema[i] <- beta*x$close[i] + as.numeric((1-beta) * x$ema[i-1])
+  }
+  return(x$ema)
+}
+
+bacplot <- cbind(Cl(stock_data10), bacEMA(stock_data10, 100))
+plot(bacplot['2010/'])
+```
+EMA LLY
+```{r}
+stock_data11 <- getSymbols("LLY", auto.assign = FALSE)
+```
+
+```{r}
+llyEMA <- function(stock_data11, n){
+  x <- Cl(stock_data11)
+  names(x) <- c("close")
+  x$ema <- NA
+  x$ema[n] <- mean(x$close[1:n])
+  beta <- 2/(n+1)
+  
+  for(i in (n+1):length(x$close)){
+    x$ema[i] <- beta*x$close[i] + as.numeric((1-beta) * x$ema[i-1])
+  }
+  return(x$ema)
+}
+
+llyplot <- cbind(Cl(stock_data11), llyEMA(stock_data11, 100))
+plot(llyplot['2010/'])
+```
+EMA UNH
+```{r}
+stock_data12 <- getSymbols("UNH", auto.assign = FALSE)
+```
+
+```{r}
+unhEMA <- function(stock_data12, n){
+  x <- Cl(stock_data12)
+  names(x) <- c("close")
+  x$ema <- NA
+  x$ema[n] <- mean(x$close[1:n])
+  beta <- 2/(n+1)
+  
+  for(i in (n+1):length(x$close)){
+    x$ema[i] <- beta*x$close[i] + as.numeric((1-beta) * x$ema[i-1])
+  }
+  return(x$ema)
+}
+
+unhplot <- cbind(Cl(stock_data12), unhEMA(stock_data12, 100))
+plot(unhplot['2010/'])
+```
+EMA JNJ
+```{r}
+stock_data13 <- getSymbols("JNJ", auto.assign = FALSE)
+```
+
+```{r}
+jnjEMA <- function(stock_data13, n){
+  x <- Cl(stock_data13)
+  names(x) <- c("close")
+  x$ema <- NA
+  x$ema[n] <- mean(x$close[1:n])
+  beta <- 2/(n+1)
+  
+  for(i in (n+1):length(x$close)){
+    x$ema[i] <- beta*x$close[i] + as.numeric((1-beta) * x$ema[i-1])
+  }
+  return(x$ema)
+}
+
+jnjplot <- cbind(Cl(stock_data13), jnjEMA(stock_data13, 100))
+plot(jnjplot['2010/'])
+```
+EMA ABBV
+```{r}
+stock_data14 <- getSymbols("ABBV", auto.assign = FALSE)
+```
+
+```{r}
+abbvEMA <- function(stock_data14, n){
+  x <- Cl(stock_data14)
+  names(x) <- c("close")
+  x$ema <- NA
+  x$ema[n] <- mean(x$close[1:n])
+  beta <- 2/(n+1)
+  
+  for(i in (n+1):length(x$close)){
+    x$ema[i] <- beta*x$close[i] + as.numeric((1-beta) * x$ema[i-1])
+  }
+  return(x$ema)
+}
+
+abbvplot <- cbind(Cl(stock_data14), abbvEMA(stock_data14, 100))
+plot(abbvplot['2010/'])
+```
+EMA MRK
+```{r}
+stock_data15 <- getSymbols("MRK", auto.assign = FALSE)
+```
+
+```{r}
+mrkEMA <- function(stock_data15, n){
+  x <- Cl(stock_data15)
+  names(x) <- c("close")
+  x$ema <- NA
+  x$ema[n] <- mean(x$close[1:n])
+  beta <- 2/(n+1)
+  
+  for(i in (n+1):length(x$close)){
+    x$ema[i] <- beta*x$close[i] + as.numeric((1-beta) * x$ema[i-1])
+  }
+  return(x$ema)
+}
+
+mrkplot <- cbind(Cl(stock_data15), mrkEMA(stock_data15, 100))
+plot(mrkplot['2010/'])
+```
+EMA AMZN
+```{r}
+stock_data16 <- getSymbols("AMZN", auto.assign = FALSE)
+```
+
+```{r}
+amznEMA <- function(stock_data16, n){
+  x <- Cl(stock_data16)
+  names(x) <- c("close")
+  x$ema <- NA
+  x$ema[n] <- mean(x$close[1:n])
+  beta <- 2/(n+1)
+  
+  for(i in (n+1):length(x$close)){
+    x$ema[i] <- beta*x$close[i] + as.numeric((1-beta) * x$ema[i-1])
+  }
+  return(x$ema)
+}
+
+amznplot <- cbind(Cl(stock_data16), amznEMA(stock_data15, 100))
+plot(amznplot['2010/'])
+```
+EMA TSLA
+```{r}
+stock_data17 <- getSymbols("TSLA", auto.assign = FALSE)
+```
+
+```{r}
+tslaEMA <- function(stock_data17, n){
+  x <- Cl(stock_data17)
+  names(x) <- c("close")
+  x$ema <- NA
+  x$ema[n] <- mean(x$close[1:n])
+  beta <- 2/(n+1)
+  
+  for(i in (n+1):length(x$close)){
+    x$ema[i] <- beta*x$close[i] + as.numeric((1-beta) * x$ema[i-1])
+  }
+  return(x$ema)
+}
+
+tslaplot <- cbind(Cl(stock_data17), tslaEMA(stock_data17, 100))
+plot(tslaplot['2010/'])
+```
+EMA HD
+```{r}
+stock_data18 <- getSymbols("HD", auto.assign = FALSE)
+```
+
+```{r}
+hdEMA <- function(stock_data18, n){
+  x <- Cl(stock_data18)
+  names(x) <- c("close")
+  x$ema <- NA
+  x$ema[n] <- mean(x$close[1:n])
+  beta <- 2/(n+1)
+  
+  for(i in (n+1):length(x$close)){
+    x$ema[i] <- beta*x$close[i] + as.numeric((1-beta) * x$ema[i-1])
+  }
+  return(x$ema)
+}
+
+hdplot <- cbind(Cl(stock_data18), hdEMA(stock_data18, 100))
+plot(hdplot['2010/'])
+```
+EMA MCD
+```{r}
+stock_data19 <- getSymbols("MCD", auto.assign = FALSE)
+```
+
+```{r}
+mcdEMA <- function(stock_data19, n){
+  x <- Cl(stock_data19)
+  names(x) <- c("close")
+  x$ema <- NA
+  x$ema[n] <- mean(x$close[1:n])
+  beta <- 2/(n+1)
+  
+  for(i in (n+1):length(x$close)){
+    x$ema[i] <- beta*x$close[i] + as.numeric((1-beta) * x$ema[i-1])
+  }
+  return(x$ema)
+}
+
+mcdplot <- cbind(Cl(stock_data19), mcdEMA(stock_data19, 100))
+plot(mcdplot['2010/'])
+```
+EMA LOW
+```{r}
+stock_data20 <- getSymbols("LOW", auto.assign = FALSE)
+```
+
+```{r}
+lowEMA <- function(stock_data20, n){
+  x <- Cl(stock_data20)
+  names(x) <- c("close")
+  x$ema <- NA
+  x$ema[n] <- mean(x$close[1:n])
+  beta <- 2/(n+1)
+  
+  for(i in (n+1):length(x$close)){
+    x$ema[i] <- beta*x$close[i] + as.numeric((1-beta) * x$ema[i-1])
+  }
+  return(x$ema)
+}
+
+lowplot <- cbind(Cl(stock_data20), lowEMA(stock_data20, 100))
+plot(lowplot['2010/'])
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
