@@ -234,6 +234,59 @@ head(adjusted_returns)
 ```
 #Above this line has been updated to accomodate for the new list of stocks
 
+#Portfolio 1: Frequent buy signals
+```{r}
+# Count the number of buy signals (i.e., sum the 1's) for each stock
+buy_signal_counts <- colSums(buy_signals_df)
+print(buy_signal_counts)  # View buy signals count per stock
+
+
+# Sort stocks by buy signal count in descending order
+top_stocks <- sort(buy_signal_counts, decreasing = TRUE)
+
+# Select the top N stocks (e.g., top 3)
+N <- 5  # Adjust this number as needed
+selected_stocks <- names(top_stocks)[1:N]
+print(selected_stocks)  # Stocks to include in the portfolio
+```
+
+```{r}
+# Filter portfolio returns for selected stocks
+selected_returns <- portfolio_returns_data[, selected_stocks]
+head(selected_returns)  # Preview the returns for selected stocks
+
+```
+
+```{r}
+# Define equal weights for each selected stock
+weights <- rep(1 / length(selected_stocks), length(selected_stocks))
+names(weights) <- selected_stocks
+print(weights)  # Check portfolio weights
+
+```
+
+```{r}
+# Calculate weighted portfolio returns
+library(PerformanceAnalytics)
+portfolio_returns <- Return.portfolio(selected_returns, weights = weights, rebalance_on = "months")
+
+# Plot portfolio returns
+chart.CumReturns(portfolio_returns, main = "Cumulative Returns of Buy Signal-Based Portfolio", ylab = "Cumulative Return")
+
+```
+
+```{r}
+# Calculate performance metrics
+portfolio_performance <- table.AnnualizedReturns(portfolio_returns)
+print(portfolio_performance)
+
+# Calculate the Sharpe Ratio
+sharpe_ratio <- SharpeRatio.annualized(portfolio_returns)
+print(sharpe_ratio)
+
+```
+
+
 #6. Build Portfolio
 ```{r}
 #Portfolio 1: Focus on stocks with frequent buy signals.
